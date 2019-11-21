@@ -19,7 +19,7 @@ class _ChartWidgetState extends State<ChartWidget> {
   void initState() {
     super.initState();
     _drawHelper = MethodDrawHelper();
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < 3; i++) {
       MethodResp resp4 = MethodResp.fromJson(json.decode(testJson));
       _drawHelper.addCall(resp4.methodCall);
     }

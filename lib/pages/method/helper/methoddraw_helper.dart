@@ -55,27 +55,21 @@ class MethodDrawHelper {
   scroll(double dy) {
     CallDrawItem callDrawItem = _items[_showTopIndex];
     callDrawItem.measure();
-    double willTop = callDrawItem.top + dy;
-    if(willTop > callDrawItem.h) {//下一个可见
-      if(_showTopIndex + 1 < _items.length) {
+    double willTop = callDrawItem.top +  dy;
+
+    if(willTop < 0 && willTop.abs() > callDrawItem.h && _showTopIndex + 1 < _items.length) {//往上滑动
         _showTopIndex++;
         CallDrawItem next = _items[_showTopIndex];
         next.measure();
-        next.top = willTop - callDrawItem.h;
-      }
-
-    } else if(willTop < 0) {
-      if(_showTopIndex - 1 >= 0) {
+        next.top = willTop + callDrawItem.h;
+    } else if(willTop > 0 && _showTopIndex - 1 >= 0) {//往下滑动
         _showTopIndex--;
         CallDrawItem pre = _items[_showTopIndex];
         pre.measure();
-        pre.top = pre.h - willTop.abs();
-      }
+        pre.top = willTop.abs() - pre.h;
     } else {
       callDrawItem.top = willTop;
     }
-
-
 
   }
 
@@ -92,7 +86,6 @@ class MethodDrawHelper {
       int index = _showTopIndex;
       double nextTop = 0;
       CallDrawItem next = _items[index];
-      print('总的时间：' + next.totalTime?.toString());
       nextTop = next.top;
       while (_isVisible(next.top)) {
         next.performDraw(canvas, nextTop, paint);
