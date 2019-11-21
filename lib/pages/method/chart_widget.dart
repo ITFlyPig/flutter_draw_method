@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
+import 'helper/fling_helper.dart';
 import 'helper/methoddraw_helper.dart';
 import 'model/method_resp.dart';
 
@@ -11,19 +13,34 @@ class ChartWidget extends StatefulWidget {
   _ChartWidgetState createState() => _ChartWidgetState();
 }
 
-class _ChartWidgetState extends State<ChartWidget> {
+class _ChartWidgetState extends State<ChartWidget> with SingleTickerProviderStateMixin {
   MethodDrawHelper _drawHelper;
   double _dy = 0;
+  FlingHelper _flingHelper;
 
   @override
   void initState() {
     super.initState();
     _drawHelper = MethodDrawHelper();
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < 100; i++) {
       MethodResp resp4 = MethodResp.fromJson(json.decode(testJson));
       _drawHelper.addCall(resp4.methodCall);
     }
+
+    _flingHelper = FlingHelper();
+    _flingHelper.addUpdateListener((pos, dy){
+      setState(() {
+        _dy = dy;
+      });
+    }, (){});
+
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,9 +55,15 @@ class _ChartWidgetState extends State<ChartWidget> {
       ),
       onVerticalDragUpdate: (detail){
          setState(() {
-           _dy = detail.delta.dy;
+           _dy = detail.delta.dy * 2;
          });
          print('滑动的距离：' + _dy.toString());
+      },
+      onVerticalDragEnd: (detail){
+      _flingHelper.startFling(0.135, 10, detail.velocity.pixelsPerSecond.dy, null, null);
+      },
+      onTapDown: (detail){
+        _flingHelper.stop();
       },
     );
   }
@@ -74,3 +97,4 @@ class ChartPainter extends CustomPainter {
   }
 
 }
+
