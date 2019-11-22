@@ -53,6 +53,9 @@ class MethodDrawHelper {
 
   ///dy > 0:向上  dy < 0:向下
   scroll(double dy) {
+    if(_items == null || _items.length == 0) {
+      return;
+    }
     CallDrawItem callDrawItem = _items[_showTopIndex];
     callDrawItem.measure();
     double willTop = callDrawItem.top +  dy;

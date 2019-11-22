@@ -16,6 +16,7 @@ class _MethodPageState extends State<MethodPage> {
 
   @override
   Widget build(BuildContext context) {
+    print('_MethodPageState build');
     return SafeArea(
       child: Material(
         child: Scaffold(
@@ -36,7 +37,9 @@ class _MethodPageState extends State<MethodPage> {
 
   Widget _chartWidget() {
     return Container(
-      child: ChartWidget(),
+      child: RepaintBoundary(
+        child: ChartWidget(),
+      ),
     );
   }
 

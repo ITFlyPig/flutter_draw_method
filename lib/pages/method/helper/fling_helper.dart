@@ -7,7 +7,6 @@ typedef OnDone = void Function();
 
 class FlingHelper {
   FrictionSimulation _frictionSimulation;
-  int _startTime;
   FlingUpdate _flingUpdate;
   OnDone _onDone;
   double _lastPosition = 0;
@@ -29,14 +28,17 @@ class FlingHelper {
 
     } else {
       double newPosition = _frictionSimulation.x(time);
-      _flingUpdate?.call(newPosition, newPosition - _lastPosition);
+      double dy = newPosition - _lastPosition;
+      _flingUpdate?.call(newPosition, dy);
       _lastPosition = newPosition;
     }
   }
 
   stop() {
     _isStop = true;
-    _ticker.stop();
+    if(_ticker != null) {
+      _ticker.stop();
+    }
   }
 
   startFling(
@@ -59,7 +61,6 @@ class FlingHelper {
      _ticker.start();
    }
 
-    _startTime = DateTime.now().millisecondsSinceEpoch;
     _frictionSimulation = FrictionSimulation(drag, position, velocity);
   }
 }

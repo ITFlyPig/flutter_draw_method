@@ -1,38 +1,79 @@
 import 'dart:convert';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
+import 'package:flutter_draw_method/pages/method/draw_widget.dart';
 
 import 'helper/fling_helper.dart';
 import 'helper/methoddraw_helper.dart';
 import 'model/method_resp.dart';
-
 
 class ChartWidget extends StatefulWidget {
   @override
   _ChartWidgetState createState() => _ChartWidgetState();
 }
 
-class _ChartWidgetState extends State<ChartWidget> with SingleTickerProviderStateMixin {
+class _ChartWidgetState extends State<ChartWidget>
+    with SingleTickerProviderStateMixin {
   MethodDrawHelper _drawHelper;
-  double _dy = 0;
   FlingHelper _flingHelper;
+  ScrollDy _scrollDy;
+  Map<Type, GestureRecognizerFactory> _gestureRecognizers;
 
   @override
   void initState() {
     super.initState();
+    _scrollDy = ScrollDy();
     _drawHelper = MethodDrawHelper();
-    for(int i = 0; i < 100; i++) {
+    for (int i = 0; i < 100; i++) {
       MethodResp resp4 = MethodResp.fromJson(json.decode(testJson));
       _drawHelper.addCall(resp4.methodCall);
     }
 
     _flingHelper = FlingHelper();
-    _flingHelper.addUpdateListener((pos, dy){
-      setState(() {
-        _dy = dy;
-      });
-    }, (){});
+    _flingHelper.addUpdateListener((pos, dy) {
+      _scrollDy.dy = dy;
+    }, () {});
+
+    _gestureRecognizers = <Type, GestureRecognizerFactory>{
+      VerticalDragGestureRecognizer: GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+            () => VerticalDragGestureRecognizer(),
+            (VerticalDragGestureRecognizer instance) {
+          instance
+            ..onDown = _handleDragDown
+            ..onStart = _handleDragStart
+            ..onUpdate = _handleDragUpdate
+            ..onEnd = _handleDragEnd
+            ..onCancel = _handleDragCancel
+            ..minFlingDistance = 20
+            ..minFlingVelocity = 100
+            ..maxFlingVelocity = 1000
+            ..dragStartBehavior = DragStartBehavior.down;
+        },
+      ),
+    };
+
+  }
+
+  _handleDragDown(DragDownDetails details){
+    _flingHelper.stop();
+  }
+
+  _handleDragStart(DragStartDetails details){
+
+  }
+
+  _handleDragUpdate(DragUpdateDetails details){
+    _scrollDy.dy = details.delta.dy * 2;
+
+  }
+
+  _handleDragEnd(DragEndDetails details){
+    _flingHelper.startFling(
+        0.135, 0, details.velocity.pixelsPerSecond.dy, null, null);
+  }
+
+  _handleDragCancel(){
 
   }
 
@@ -41,47 +82,35 @@ class _ChartWidgetState extends State<ChartWidget> with SingleTickerProviderStat
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    print('ChartWidget  build');
+    return RawGestureDetector(
+      gestures: _gestureRecognizers,
       child: Container(
         color: Colors.amber[50],
         width: double.infinity,
         height: 500,
-        child: CustomPaint(
-          painter: ChartPainter(_drawHelper, _dy),
+        child: ClipRect(
+          child: RepaintBoundary(
+            child: DrawWidget(_scrollDy),
+          ),
         ),
       ),
-      onVerticalDragUpdate: (detail){
-         setState(() {
-           _dy = detail.delta.dy * 2;
-         });
-         print('滑动的距离：' + _dy.toString());
-      },
-      onVerticalDragEnd: (detail){
-      _flingHelper.startFling(0.135, 10, detail.velocity.pixelsPerSecond.dy, null, null);
-      },
-      onTapDown: (detail){
-        _flingHelper.stop();
-      },
     );
   }
 }
-
 
 class ChartPainter extends CustomPainter {
   MethodDrawHelper _drawHelper;
   Paint _paint;
   double _dy;
 
-
   ChartPainter(this._drawHelper, this._dy) {
     _paint = Paint()
       ..isAntiAlias = true
       ..style = PaintingStyle.fill;
   }
-
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -95,6 +124,4 @@ class ChartPainter extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }
-
 }
-
