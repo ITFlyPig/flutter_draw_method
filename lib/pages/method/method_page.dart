@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_draw_method/res/colors.dart';
 
 import 'chart_widget.dart';
+import 'chart_widget2.dart';
 
 class MethodPage extends StatefulWidget {
   @override
@@ -36,10 +37,13 @@ class _MethodPageState extends State<MethodPage> {
   }
 
   Widget _chartWidget() {
-    return Container(
-      child: RepaintBoundary(
-        child: ChartWidget(),
+    return Expanded(
+      child: Container(
+        child: RepaintBoundary(
+          child: ChartWidget2(),
+        ),
       ),
+      flex: 1,
     );
   }
 

@@ -27,6 +27,19 @@ class MethodDrawHelper {
     _items = List();
   }
 
+  CallDrawItem getItem(int index) {
+    if(index >= 0 && index < _items.length) {
+      return _items[index];
+    } else {
+      return null;
+    }
+  }
+
+  int getItemSize() {
+    return _items == null ? 0 : _items.length;
+  }
+
+
   set screenH(double value) {
     _screenH = value;
   }
