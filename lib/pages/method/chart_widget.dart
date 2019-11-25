@@ -20,6 +20,8 @@ class _ChartWidgetState extends State<ChartWidget>
   ScrollDy _scrollDy;
   Map<Type, GestureRecognizerFactory> _gestureRecognizers;
 
+  AnimationController _animationController;
+  double _lastPos = 0;
   @override
   void initState() {
     super.initState();
@@ -53,6 +55,12 @@ class _ChartWidgetState extends State<ChartWidget>
       ),
     };
 
+    _animationController = AnimationController(vsync: this, lowerBound: 0, upperBound: 300, duration: Duration(seconds: 1));
+    _animationController.addListener((){
+      _scrollDy.dy = _lastPos - _animationController.value;
+      _lastPos = _animationController.value;
+
+    });
   }
 
   _handleDragDown(DragDownDetails details){
@@ -69,8 +77,10 @@ class _ChartWidgetState extends State<ChartWidget>
   }
 
   _handleDragEnd(DragEndDetails details){
-    _flingHelper.startFling(
-        0.135, 0, details.velocity.pixelsPerSecond.dy, null, null);
+//    _flingHelper.startFling(
+//        0.135, 0, details.velocity.pixelsPerSecond.dy, null, null);
+    _animationController.reset();
+    _animationController.forward();
   }
 
   _handleDragCancel(){

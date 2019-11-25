@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -13,9 +14,11 @@ class FlingHelper {
   bool _isStop = false;
   Ticker _ticker;
 
+
   addUpdateListener(FlingUpdate flingUpdate,OnDone onDone ) {
     _flingUpdate = flingUpdate;
     _onDone = onDone;
+
   }
 
   onFrame(double time) {
@@ -63,4 +66,7 @@ class FlingHelper {
 
     _frictionSimulation = FrictionSimulation(drag, position, velocity);
   }
+
+
+
 }
