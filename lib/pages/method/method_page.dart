@@ -1,8 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_draw_method/res/colors.dart';
+import 'dart:convert';
 
-import 'chart_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_draw_method/pages/method/helper/methoddraw_helper.dart';
+import 'package:flutter_draw_method/res/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:web_socket_channel/html.dart';
+
 import 'chart_widget2.dart';
+import 'draw_data_provider.dart';
+import 'model/method_resp.dart';
 
 class MethodPage extends StatefulWidget {
   @override
@@ -10,10 +16,11 @@ class MethodPage extends StatefulWidget {
 }
 
 class _MethodPageState extends State<MethodPage> {
-//  IOWebSocketChannel _channel;
+  HtmlWebSocketChannel _channel;
   String _message;
   SocketStatus _socketStatus = SocketStatus.WAIT;
   String _errorMsg;
+  DrawDataProvider _dataProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +47,10 @@ class _MethodPageState extends State<MethodPage> {
     return Expanded(
       child: Container(
         child: RepaintBoundary(
-          child: ChartWidget2(),
+          child: ChangeNotifierProvider.value(
+            value: _dataProvider,
+            child: ChartWidget2(),
+          ),
         ),
       ),
       flex: 1,
@@ -50,32 +60,36 @@ class _MethodPageState extends State<MethodPage> {
   @override
   void initState() {
     super.initState();
-//    _channel = IOWebSocketChannel.connect(
-//        "ws://172.16.128.52:8080/websocket/" + 'o');
-//    _channel.stream.listen((data) {
-//      print('websocket收到的消息：' + data.toString());
-//      if(data == null) {
-//        return;
-//      }
-//      Map<String, dynamic> _map = json.decode(data.toString());
-//      MethodResp resp = MethodResp.fromJson(_map);
-//
-//      setState(() {
-//        _socketStatus = SocketStatus.SUCCESS;
-//      });
-//
-//    },onError: (e){
-//      print('onError');
-//      setState(() {
-//        _errorMsg = e;
-//        _socketStatus = SocketStatus.ERROR;
-//      });
-//    }, onDone: (){
-//      print('onDone');
-//      setState(() {
-//        _socketStatus = SocketStatus.CLOSE;
-//      });
-//    }, cancelOnError: true);
+    _dataProvider = DrawDataProvider();
+
+//    MethodResp resp4 = MethodResp.fromJson(json.decode(Uri.decodeComponent(testJson2)));
+//    _dataProvider.drawHelper.addCall(resp4.methodCall);
+
+    _channel = HtmlWebSocketChannel.connect(
+        "ws://172.16.128.58:8080/websocket/" + 'o');
+    _channel.stream.listen((data) {
+      print('websocket收到的消息：' + data.toString());
+      if (data == null) {
+        return;
+      }
+      Map<String, dynamic> _map = json.decode(data.toString());
+      MethodResp resp = MethodResp.fromJson(_map);
+      _dataProvider.addCall(resp?.methodCall);
+      setState(() {
+        _socketStatus = SocketStatus.SUCCESS;
+      });
+    }, onError: (e) {
+      print('onError');
+      setState(() {
+        _errorMsg = e;
+        _socketStatus = SocketStatus.ERROR;
+      });
+    }, onDone: () {
+      print('onDone');
+      setState(() {
+        _socketStatus = SocketStatus.CLOSE;
+      });
+    }, cancelOnError: true);
   }
 
   @override

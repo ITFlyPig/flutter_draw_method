@@ -47,7 +47,7 @@ class MethodRenderObject extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
-    callDrawItem?.draw(context.canvas, _paint);
+    callDrawItem?.draw(context.canvas, _paint, 0, callDrawItem.childs == null ? 0 : callDrawItem.childs.length);
 
   }
 

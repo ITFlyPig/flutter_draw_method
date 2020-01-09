@@ -2,8 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_draw_method/pages/method/draw_data_provider.dart';
 import 'package:flutter_draw_method/pages/method/draw_widget.dart';
 import 'package:flutter_draw_method/pages/method/helper/item_method.dart';
+import 'package:provider/provider.dart';
 
 import 'helper/fling_helper.dart';
 import 'helper/methoddraw_helper.dart';
@@ -19,27 +21,25 @@ class ChartWidget2 extends StatefulWidget {
 }
 
 class _ChartWidgetState2 extends State<ChartWidget2> {
-  MethodDrawHelper _drawHelper;
+  ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
-    _drawHelper = MethodDrawHelper();
-    for (int i = 0; i < 100; i++) {
-      MethodResp resp4 = MethodResp.fromJson(json.decode(testJson));
-      _drawHelper.addCall(resp4.methodCall);
-    }
-
+    _scrollController = ScrollController();
   }
 
 
   @override
   Widget build(BuildContext context) {
+    DrawDataProvider dataProvider = Provider.of<DrawDataProvider>(context);
+    MethodDrawHelper methodDrawHelper = dataProvider.drawHelper;
     return Container(
       child: ListView.builder(itemBuilder: (context, index){
-        return MethodWidget(_drawHelper.getItem(index));
+        return MethodWidget(methodDrawHelper.getItem(index));
       },
-        itemCount: _drawHelper.getItemSize(),
+        itemCount: methodDrawHelper.getItemSize(),
+        controller: _scrollController,
       ),
 
     );

@@ -1,3 +1,4 @@
+import 'dart:html';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -6,7 +7,7 @@ import 'package:flutter_draw_method/pages/method/helper/methoddraw_helper.dart';
 
 class CallDrawItem {
   static double textH = 0;
-  static double fontSize = 9;
+  static double fontSize = 5;
   String classC;
   String className;
   int endTIme;
@@ -57,13 +58,13 @@ class CallDrawItem {
       measure();
     }
     this.top = top;
-    draw(canvas, paint);
+    draw(canvas, paint, 0, childs == null ? 0 : childs.length);
   }
 
-  draw(Canvas canvas, Paint paint) {
+  draw(Canvas canvas, Paint paint, int index, int size) {
     //绘制自己
     paint.color = this.color;
-    canvas.drawRect(Rect.fromLTWH(left, top, w, h), paint);
+    canvas.drawRect(Rect.fromLTWH(left, top, w, index == 0 && size > 0 ? h - MethodDrawHelper.TOP_PADDING : h), paint);
 
     String drawText = (className ?? "") + '#' + (methodName ?? "") +
         ('(' + (totalTime ?? 0).toString() + ")");
@@ -87,13 +88,17 @@ class CallDrawItem {
 
     //迭代绘制child
     int childSize = childs == null ? 0 : childs.length;
-    double leftTotal = 0;
+
+    double leftTotal = left;
     double topTotal = top;
     for (int i = 0; i < childSize; i++) {
       CallDrawItem item = childs[i];
       item.top = topTotal;
+      if (i == 0) {
+        item.top += MethodDrawHelper.TOP_PADDING;
+      }
       item.left = leftTotal;
-      item.draw(canvas, paint);
+      item.draw(canvas, paint, i, childSize);
       leftTotal += item.w;
       topTotal += item.h;
     }
@@ -151,6 +156,9 @@ class CallDrawItem {
         child.measure();
         totalW += child.w;
         totalH += child.h;
+        if (i == 0) {
+          totalH += MethodDrawHelper.TOP_PADDING;
+        }
       }
       if (totalTime > 0) {
         double timeW = totalTime * MethodDrawHelper.TIME_TO_DISTANCE +
@@ -159,7 +167,7 @@ class CallDrawItem {
           totalW = timeW;
         }
       }
-      w = totalW;
+      w = totalW + MethodDrawHelper.RIGHT_PADDING;
       h = totalH;
     }
   }
