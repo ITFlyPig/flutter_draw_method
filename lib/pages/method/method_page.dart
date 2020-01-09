@@ -45,13 +45,21 @@ class _MethodPageState extends State<MethodPage> {
 
   Widget _chartWidget() {
     return Expanded(
-      child: Container(
-        child: RepaintBoundary(
-          child: ChangeNotifierProvider.value(
-            value: _dataProvider,
-            child: ChartWidget2(),
+      child: Stack(
+        children: <Widget>[
+          Container(
+            child: RepaintBoundary(
+              child: ChangeNotifierProvider.value(
+                value: _dataProvider,
+                child: ChartWidget2(),
+              ),
+            ),
           ),
-        ),
+          Align(
+            alignment: Alignment.topRight,
+            child: RaisedButton(child: Text('清除数据'),onPressed: (){_dataProvider.clearData();},),
+          )
+        ],
       ),
       flex: 1,
     );
@@ -68,7 +76,7 @@ class _MethodPageState extends State<MethodPage> {
     _channel = HtmlWebSocketChannel.connect(
         "ws://172.16.128.58:8080/websocket/" + 'o');
     _channel.stream.listen((data) {
-      print('websocket收到的消息：' + data.toString());
+//      print('websocket收到的消息：' + data.toString());
       if (data == null) {
         return;
       }

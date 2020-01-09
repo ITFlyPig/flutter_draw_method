@@ -4,10 +4,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_draw_method/pages/method/helper/color_pool.dart';
 import 'package:flutter_draw_method/pages/method/helper/methoddraw_helper.dart';
+import 'package:flutter_draw_method/res/colors.dart';
 
 class CallDrawItem {
   static double textH = 0;
-  static double fontSize = 5;
+  static double fontSize = 1;
   String classC;
   String className;
   int endTIme;
@@ -64,27 +65,33 @@ class CallDrawItem {
   draw(Canvas canvas, Paint paint, int index, int size) {
     //绘制自己
     paint.color = this.color;
-    canvas.drawRect(Rect.fromLTWH(left, top, w, index == 0 && size > 0 ? h - MethodDrawHelper.TOP_PADDING : h), paint);
+    canvas.drawRect(Rect.fromLTWH(left, top, w,
+        index == 0 && size > 0 ? h - MethodDrawHelper.TOP_PADDING : h), paint);
 
     String drawText = (className ?? "") + '#' + (methodName ?? "") +
         ('(' + (totalTime ?? 0).toString() + ")");
-    if(textH == 0) {
+    if (textH == 0) {
       Size size = measureTextSize(drawText, fontSize);
       textH = size.height;
     }
 
     //防止文字重叠
     double textTop = top;
-    if(parent != null) {
-      if((parent.top - textTop).abs() < textH) {
+    if (parent != null) {
+      if ((parent.top - textTop).abs() < textH) {
         textTop += textH;
       }
     }
 
     //绘制文字
-    _drawText(canvas, Offset(left + w, textTop),
-        drawText, fontSize, color,
-        double.infinity);
+    _drawText(
+        canvas,
+        Offset(left + w, textTop),
+        drawText,
+        fontSize,
+        color,
+        double.infinity,
+        paint);
 
     //迭代绘制child
     int childSize = childs == null ? 0 : childs.length;
@@ -110,16 +117,27 @@ class CallDrawItem {
       String drawText,
       double fontSize,
       Color color,
-      double width,) {
-    TextPainter(
+      double width, Paint paint) {
+    TextPainter textPainter = TextPainter(
         text: TextSpan(
           text: drawText,
           style: TextStyle(fontSize: fontSize, color: color),
         ),
         textDirection: TextDirection.ltr,
         textAlign: TextAlign.left)
-      ..layout(minWidth: width, maxWidth: width)
-      ..paint(canvas, top);
+      ..layout(maxWidth: width);
+    //绘制文字的背景
+    _drawTextBg(
+        top.dx, top.dy, textPainter.width, textPainter.height, canvas, paint);
+    //绘制文字
+    textPainter.paint(canvas, top);
+  }
+
+  ///绘制文字的背景
+  _drawTextBg(double left, double top, double width, double height,
+      Canvas canvas, Paint paint) {
+    paint.color = Colours.trans_white;
+    canvas.drawRect(Rect.fromLTWH(left, top, width, height), paint);
   }
 
   ///计算文字的尺寸
@@ -138,7 +156,7 @@ class CallDrawItem {
 
   ///测量出宽和高
   measure() {
-    if(w > 0 && h > 0) {
+    if (w > 0 && h > 0) {
       return;
     }
     if (childs == null || childs.isEmpty) {

@@ -154,4 +154,9 @@ class MethodDrawHelper {
 
     }
   }
+
+  ///清除数据
+  clear(){
+    _items.clear();
+  }
 }

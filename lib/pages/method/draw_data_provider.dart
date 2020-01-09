@@ -18,5 +18,10 @@ class DrawDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  clearData() {
+    _drawHelper.clear();
+    notifyListeners();
+  }
+
 
 }
